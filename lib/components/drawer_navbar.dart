@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gudang_market_fish/screens/profile/views/add_address.dart';
 
+import '../screens/auth/blocs/auth_bloc.dart';
+import '../screens/auth/views/sign_in_screen.dart';
 import '../screens/confirm/views/confirm_screen.dart';
 import '../screens/product/views/product_form_screen.dart';
 import '../screens/profile/views/profile_screen.dart';
-import '../screens/profile/views/setting_address.dart';
+import '../screens/profile/views/address_page.dart';
 import '../screens/shopstatistic/views/shop_statistics_screen.dart';
 
 class DrawerNavbar extends StatelessWidget {
@@ -71,7 +75,7 @@ class DrawerNavbar extends StatelessWidget {
             onTap: () => {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => SettingAddress()),
+                MaterialPageRoute(builder: (context) => AddressPage()),
               )
             },
           ),
@@ -110,7 +114,13 @@ class DrawerNavbar extends StatelessWidget {
           ListTile(
             title: Text('Logout'),
             leading: Icon(Icons.exit_to_app),
-            onTap: () => null,
+            onTap: () {
+              context.read<AuthBloc>().add(LogoutEvent());
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const SignInScreen()),
+              );
+            },
           ),
         ],
       ),

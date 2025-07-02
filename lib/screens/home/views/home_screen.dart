@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gudang_market_fish/components/drawer_navbar.dart';
+import 'package:gudang_market_fish/components/item_card.dart';
+import 'package:gudang_market_fish/constants.dart';
+import 'package:gudang_market_fish/screens/cart/views/shopping_cart.dart';
+import 'package:gudang_market_fish/screens/details/views/details_screen.dart';
 
 import '../../../components/categorries.dart';
-import '../../../components/drawer_navbar.dart';
-import '../../../components/item_card.dart';
 import '../../../components/search_screen.dart';
-import '../../../constants.dart';
-import '../../../models/product.dart';
-import '../../cart/views/shopping_cart.dart';
-import '../../details/views/details_screen.dart';
+import '../../auth/blocs/auth_bloc.dart';
+import '../blocs/product_bloc.dart';
+
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
@@ -17,6 +20,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.read<ProductBloc>().add(FetchProducts());
+    print('[UI] Membangun HomeScreen');
     return Scaffold(
       key: scaffoldKey,
       drawer: DrawerNavbar(),
@@ -52,52 +57,12 @@ class HomeScreen extends StatelessWidget {
           //     );
           //   },
           // ),
-          // Stack(
-          //   children: [
-              // IconButton(
-              //   icon: SvgPicture.asset(
-              //     "assets/icons/cart.svg",
-              //     colorFilter: const ColorFilter.mode(kTextColor, BlendMode.srcIn),
-              //   ),
-              //   onPressed: () {
-              //     Navigator.push(
-              //       context,
-              //       MaterialPageRoute(builder: (context) => const ShoppingCart()),
-              //     );
-              //   },
-              // ),
-              // Positioned(
-              //   right: 6,
-              //   top: 6,
-              //   child: Container(
-              //     padding: const EdgeInsets.all(2),
-              //     decoration: BoxDecoration(
-              //       color: Colors.red,
-              //       borderRadius: BorderRadius.circular(10),
-              //     ),
-              //     constraints: const BoxConstraints(
-              //       minWidth: 16,
-              //       minHeight: 16,
-              //     ),
-              //     child: const Text(
-              //       '3', // ganti ini nanti dengan jumlah item dari state
-              //       style: TextStyle(
-              //         color: Colors.white,
-              //         fontSize: 10,
-              //       ),
-              //       textAlign: TextAlign.center,
-              //     ),
-              //   ),
-              // ),
-          //   ],
-          // ),
-
           IconButton(
             iconSize: 35.0,
             icon: SvgPicture.asset(
               "assets/icons/burger.svg",
-              height: 35.0, // Atur tinggi SVG
-              width: 35.0,  // Atur lebar SVG
+              height: 35.0,
+              width: 35.0,
               colorFilter: const ColorFilter.mode(kTextColor, BlendMode.srcIn),
             ),
             onPressed: () {
@@ -107,47 +72,104 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(width: kDefaultPaddin / 2)
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: kDefaultPaddin),
-            // child: Text(
-            //   "Women",
-            //   style: Theme.of(context)
-            //       .textTheme
-            //       .titleLarge!
-            //       .copyWith(fontWeight: FontWeight.bold),
-            // ),
-          ),
-          const Categories(),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: kDefaultPaddin),
-              child: GridView.builder(
-                itemCount: products.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: kDefaultPaddin,
-                  crossAxisSpacing: kDefaultPaddin,
-                  childAspectRatio: 0.75,
-                ),
-                itemBuilder: (context, index) => ItemCard(
-                  product: products[index],
-                  press: () =>
-                    Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DetailsScreen(
-                        // product: products[index],
-                      ),
-                    ),
+      body: BlocConsumer<AuthBloc, AuthState>(
+        listener: (context, authState) {
+          if (authState is AuthFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(authState.message)),
+            );
+          }
+        },
+        builder: (context, authState) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: kDefaultPaddin),
+                child: authState is AuthSuccess
+                    ? Text(
+                  'Welcome, ${authState.authEntity.name}!',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+                    : const SizedBox.shrink(),
+              ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: kDefaultPaddin),
+              //   child: Text(
+              //     'Fresh Fish Market',
+              //     style: TextStyle(
+              //       fontSize: 24,
+              //       fontWeight: FontWeight.bold,
+              //       color: Colors.blue[800],
+              //     ),
+              //   ),
+              // ),
+              const SizedBox(height: 10),
+              const Categories(),
+              const SizedBox(height: 10),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: kDefaultPaddin),
+                  child: BlocBuilder<ProductBloc, ProductState>(
+                    builder: (context, state) {
+                      print('[UI] Current ProductState: ${state.runtimeType}');
+                      if (state is ProductLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (state is ProductError) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(state.message),
+                              const SizedBox(height: 20),
+                              ElevatedButton(
+                                onPressed: () {
+                                  context.read<ProductBloc>().add(FetchProducts());
+                                },
+                                child: const Text('Retry'),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else if (state is ProductLoaded) {
+                        return RefreshIndicator(
+                          onRefresh: () async {
+                            context.read<ProductBloc>().add(FetchProducts());
+                          },
+                          child: GridView.builder(
+                            itemCount: state.products.length,
+                            gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: kDefaultPaddin,
+                              crossAxisSpacing: kDefaultPaddin,
+                              childAspectRatio: 0.75,
+                            ),
+                            itemBuilder: (context, index) => ItemCard(
+                              product: state.products[index],
+                              press: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DetailsScreen(
+                                    product: state.products[index],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      return const Center(child: CircularProgressIndicator());
+                    },
                   ),
                 ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }

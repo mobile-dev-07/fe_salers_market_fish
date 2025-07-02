@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-
 import '../constants.dart';
-import '../models/product.dart';
+import 'auth/domain/entities/product_entity.dart';
 
 class ItemCard extends StatelessWidget {
-  const ItemCard({super.key, required this.product, required this.press});
-
-  final Product product;
+  final ProductEntity product;
   final VoidCallback press;
+
+  const ItemCard({
+    super.key,
+    required this.product,
+    required this.press,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,19 +19,20 @@ class ItemCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          // Ukuran gambar yang seragam: rasio 1:1 (square)
+          // Container untuk gambar produk
           Container(
-            height: 150, // ukuran tinggi gambar
-            width: double.infinity, // agar lebarnya penuh sesuai grid
+            height: 150,
+            width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               image: DecorationImage(
-                image: AssetImage(product.image),
-                fit: BoxFit.cover, // gambar memenuhi area (crop jika perlu)
+                image: NetworkImage(product.imageUrl), // Gunakan NetworkImage
+                fit: BoxFit.cover,
               ),
             ),
           ),
           const SizedBox(height: 8),
+          // Judul produk
           Padding(
             padding: const EdgeInsets.symmetric(vertical: kDefaultPaddin / 4),
             child: Text(
@@ -40,24 +44,33 @@ class ItemCard extends StatelessWidget {
               ),
             ),
           ),
+          // Harga produk
           RichText(
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: "\Rp${product.price}",
+                  text: "Rp${product.price.toStringAsFixed(0)}", // Format harga
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
-                TextSpan(
+                const TextSpan(
                   text: "/kg",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: Colors.black,
                   ),
                 ),
               ],
+            ),
+          ),
+          // Stok produk (tambahan)
+          Text(
+            "Stok: ${product.stock} kg",
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
             ),
           ),
         ],

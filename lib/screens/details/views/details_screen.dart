@@ -1,18 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 
+import '../../../components/auth/domain/entities/product_entity.dart';
 import '../../../components/drawer_navbar.dart';
 import '../../../components/search_screen.dart';
 import '../../../constants.dart';
 import '../../cart/views/shopping_cart.dart';
 
 class DetailsScreen extends StatelessWidget {
-  DetailsScreen({super.key});
-
+  final ProductEntity product;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+  DetailsScreen({
+    super.key,
+    required this.product,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final currencyFormat = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: '',
+      decimalDigits: 0,
+    );
     return Scaffold(
       key: scaffoldKey,
       drawer: DrawerNavbar(),
@@ -36,18 +47,18 @@ class DetailsScreen extends StatelessWidget {
               );
             },
           ),
-          IconButton(
-            icon: SvgPicture.asset(
-              "assets/icons/cart.svg",
-              colorFilter: const ColorFilter.mode(kTextColor, BlendMode.srcIn),
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ShoppingCart()),
-              );
-            },
-          ),
+          // IconButton(
+          //   icon: SvgPicture.asset(
+          //     "assets/icons/cart.svg",
+          //     colorFilter: const ColorFilter.mode(kTextColor, BlendMode.srcIn),
+          //   ),
+          //   onPressed: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(builder: (context) => const ShoppingCart()),
+          //     );
+          //   },
+          // ),
           IconButton(
             iconSize: 35.0,
             icon: SvgPicture.asset(
@@ -78,8 +89,8 @@ class DetailsScreen extends StatelessWidget {
                       // borderRadius: const BorderRadius.vertical(
                       //   top: Radius.circular(20),
                       // ),
-                      child: Image.asset(
-                        'assets/images/fish_1.jpeg',
+                      child: Image.network(
+                        product.imageUrl,
                         fit: BoxFit.cover,
                         height: 330,
                         alignment: Alignment.center,
@@ -105,13 +116,13 @@ class DetailsScreen extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
-                              children: const [
+                              children: [
                                 TextSpan(
                                   text: 'RP ',
                                   style: TextStyle(fontSize: 18),
                                 ),
                                 TextSpan(
-                                  text: '250.000',
+                                  text: currencyFormat.format(product.price),
                                 ),
                               ],
                             ),
@@ -151,10 +162,30 @@ class DetailsScreen extends StatelessWidget {
                                   ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Text(
-                                  'STOK : 200',
-                                  style: TextStyle(
+                                child: Text(
+                                  'STOK : ${product.stock}',
+                                  style: const TextStyle(
                                     color: Colors.green,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [Color(0xFFBDBDBD), Color(0xFF9E9E9E)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'Berat : ${product.weight} kg',
+                                  style: TextStyle(
+                                    color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 1.2,
                                   ),
@@ -166,8 +197,8 @@ class DetailsScreen extends StatelessWidget {
                           const SizedBox(height: 16),
 
                           // Judul Produk
-                          const Text(
-                            'IKAN KERAPU SIZE XL DITANGKAP PAGI INI MASIH FRESS',
+                          Text(
+                            product.title,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -176,10 +207,8 @@ class DetailsScreen extends StatelessWidget {
                           const SizedBox(height: 16),
 
                           // Deskripsi
-                          const Text(
-                            'Enhanced capabilities thanks to an enlarged display of 6.7 inches and work without '
-                                'recharging throughout the day. Incredible photos as in weak, yes and in bright lights using '
-                                'the new system with two cameras...',
+                          Text(
+                            product.description,
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.black54,
@@ -189,30 +218,30 @@ class DetailsScreen extends StatelessWidget {
 
                           const SizedBox(height: 30),
 
-                          // Tombol tambah ke keranjang
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(vertical: 18),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                              onPressed: () {},
-                              child: const Text(
-                                'Add to cart',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
+                          // // Tombol tambah ke keranjang
+                          // SizedBox(
+                          //   width: double.infinity,
+                          //   child: ElevatedButton(
+                          //     style: ElevatedButton.styleFrom(
+                          //       backgroundColor: Colors.blue,
+                          //       foregroundColor: Colors.black,
+                          //       padding: const EdgeInsets.symmetric(vertical: 18),
+                          //       shape: RoundedRectangleBorder(
+                          //         borderRadius: BorderRadius.circular(14),
+                          //       ),
+                          //     ),
+                          //     onPressed: () {},
+                          //     child: const Text(
+                          //       'Add to cart',
+                          //       style: TextStyle(
+                          //         fontWeight: FontWeight.bold,
+                          //         fontSize: 16,
+                          //         color: Colors.white,
+                          //       ),
+                          //     ),
+                          //   ),
+                          // ),
+                          // const SizedBox(height: 24),
                         ],
                       ),
                     ),
