@@ -1,6 +1,5 @@
 part of 'address_bloc.dart';
 
-
 abstract class AddressEvent extends Equatable {
   const AddressEvent();
 
@@ -17,4 +16,10 @@ class AddNewAddress extends AddressEvent {
 
   @override
   List<Object> get props => [address];
+}
+class DeleteAddressEvent extends AddressEvent { // --- TAMBAHKAN INI ---
+  final String id;
+  const DeleteAddressEvent(this.id);
+  @override
+  List<Object> get props => [id];
 }

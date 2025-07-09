@@ -1,15 +1,15 @@
 part of 'address_bloc.dart';
 
-enum AddressStatus { initial, loading, success, failure }
+enum AddressStatus { initial, loading, success, failure, addSuccess, deleteSuccess }
 
 class AddressState extends Equatable {
   final AddressStatus status;
-  final List<AddressEntity> addresses;
+  final List<AddressEntity> addresses; // Ensure this is never null
   final String errorMessage;
 
   const AddressState({
     this.status = AddressStatus.initial,
-    this.addresses = const [],
+    this.addresses = const [], // Crucial: default to an empty list, not null
     this.errorMessage = '',
   });
 
@@ -20,10 +20,11 @@ class AddressState extends Equatable {
   }) {
     return AddressState(
       status: status ?? this.status,
-      addresses: addresses ?? this.addresses,
+      addresses: addresses ?? this.addresses, // Use existing list if new one is null
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
+
   AddressState resetStatus() {
     return copyWith(
       status: AddressStatus.success,

@@ -28,3 +28,21 @@ class ProductError extends ProductState {
   @override
   List<Object> get props => [message];
 }
+
+class ProductRegistrationSuccess extends ProductState {
+  final Map<String, dynamic> productData;
+
+  const ProductRegistrationSuccess({required this.productData});
+
+  @override
+  List<Object> get props => [productData];
+}
+
+class ProductRegistrationFailure extends ProductState {
+  final String message;
+
+  const ProductRegistrationFailure({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}

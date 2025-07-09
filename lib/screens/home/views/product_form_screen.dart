@@ -1,7 +1,12 @@
+// screens/product/views/product_form_screen.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:gudang_market_fish/screens/home/blocs/product_bloc.dart'; // Import ProductBloc
+// Don't forget to import UiCubit as well for navigation
+import 'package:gudang_market_fish/screens/home/blocs/ui_cubit.dart'; // <<<--- ADD THIS IMPORT
 
 class ProductFormScreen extends StatefulWidget {
   @override
@@ -17,14 +22,19 @@ class _ProductFormState extends State<ProductFormScreen> {
     'stock': TextEditingController(),
     'desc': TextEditingController(),
     'price': TextEditingController(),
+    'weight': TextEditingController(),
   };
 
-  // Dropdown value for category
   String? _selectedCategory = 'Kakap';
   final List<String> _categories = ['Kakap', 'Tongkol', 'Paus', 'Hiu'];
 
-  // Radio value for fresh/frozen
   String _storageType = 'Fresh';
+
+  @override
+  void dispose() {
+    _controllers.forEach((key, controller) => controller.dispose());
+    super.dispose();
+  }
 
   Future<void> _pickImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -49,7 +59,7 @@ class _ProductFormState extends State<ProductFormScreen> {
     );
   }
 
-  Widget _buildTextField(String label, String key) {
+  Widget _buildTextField(String label, String key, {TextInputType keyboardType = TextInputType.text}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -57,7 +67,14 @@ class _ProductFormState extends State<ProductFormScreen> {
         SizedBox(height: 8),
         TextFormField(
           controller: _controllers[key],
-          decoration: _inputDecoration("Charlene Reed"),
+          keyboardType: keyboardType,
+          decoration: _inputDecoration(label),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter $label';
+            }
+            return null;
+          },
         ),
         SizedBox(height: 20),
       ],
@@ -156,41 +173,94 @@ class _ProductFormState extends State<ProductFormScreen> {
     );
   }
 
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      if (_selectedImage == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select a product photo.')),
+        );
+        return;
+      }
+
+      // Dispatch the RegisterProductEvent
+      context.read<ProductBloc>().add(
+        RegisterProductEvent(
+          title: _controllers['name']!.text,
+          description: _controllers['desc']!.text,
+          price: _controllers['price']!.text,
+          stock: _controllers['stock']!.text,
+          weight: _controllers['weight']!.text,
+          image: _selectedImage!,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text("Add Product", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.black)),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black),
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: Colors.white,
+      //   elevation: 0,
+      //   iconTheme: IconThemeData(color: Colors.black),
+      // ),
       body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: EdgeInsets.all(24),
-            children: [
-              _buildTextField("Product Name", "name"),
-              _buildImagePicker(),
-              _buildDropdownCategory(),
-              _buildTextField("Product Stock", "stock"),
-              _buildTextField("Product Desc", "desc"),
-              _buildTextField("Product Price", "price"),
-              _buildStorageTypeSelector(),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  padding: EdgeInsets.symmetric(vertical: 16),
+        child: BlocListener<ProductBloc, ProductState>(
+          listener: (context, state) {
+            if (state is ProductRegistrationSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Product registered successfully!')),
+              );
+              // --- START OF CHANGES ---
+              // Instead of Navigator.pop(context), navigate using UiCubit
+              context.read<UiCubit>().navigateTo(UiPage.products); // <<<--- CHANGE THIS LINE
+              // Also, dispatch FetchProducts to refresh the data on the home screen
+              context.read<ProductBloc>().add(FetchProducts()); // <<<--- ADD THIS LINE
+              // --- END OF CHANGES ---
+            } else if (state is ProductRegistrationFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to register product: ${state.message}')),
+              );
+            } else if (state is ProductLoading) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Registering product...')),
+              );
+            }
+          },
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: EdgeInsets.all(24),
+              children: [
+                Text(
+                  "Add Product",
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24, // Sesuaikan ukuran font sesuai keinginan
+                    color: Colors.black,
+                  ),
                 ),
-                onPressed: () {
-                  // Submit logic here
-                },
-                child: Text("Save Product", style: GoogleFonts.poppins(fontSize: 16, color: Colors.white)),
-              )
-            ],
+                SizedBox(height: 24),
+                _buildTextField("Product Name", "name"),
+                _buildImagePicker(),
+                _buildDropdownCategory(),
+                _buildTextField("Product Stock", "stock", keyboardType: TextInputType.number),
+                _buildTextField("Product Desc", "desc"),
+                _buildTextField("Product Price", "price", keyboardType: TextInputType.number),
+                _buildTextField("Product Weight", "weight", keyboardType: TextInputType.number),
+                _buildStorageTypeSelector(),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  onPressed: _submitForm,
+                  child: Text("Save Product", style: GoogleFonts.poppins(fontSize: 16, color: Colors.white)),
+                )
+              ],
+            ),
           ),
         ),
       ),

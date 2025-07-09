@@ -90,11 +90,12 @@ class _AddAddressPageState extends State<AddAddressPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<AddressBloc, AddressState>(
       listener: (context, state) {
-        if (state.status == AddressStatus.success) {
+        if (state.status == AddressStatus.addSuccess) { // Periksa status addSuccess
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Address added successfully')),
           );
-          Navigator.pop(context, true); // Return true to indicate success
+          Navigator.pop(context, true); // Kembali ke halaman daftar alamat
+          context.read<AddressBloc>().add(LoadAddresses()); // Muat ulang daftar alamat di halaman sebelumnya
         } else if (state.status == AddressStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.errorMessage)),

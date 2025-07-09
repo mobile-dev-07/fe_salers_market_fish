@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
@@ -28,6 +30,33 @@ class ProductRepositoryImpl implements ProductRepository {
       } catch (e) {
         print('Unexpected error: $e');
         return Left(ServerFailure('Unexpected error'));
+      }
+    } else {
+      return Left(NetworkFailure('No internet connection'));
+    }
+  }
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> registerProduct({
+    required String title,
+    required String description,
+    required String price,
+    required String stock,
+    required String weight,
+    required File image,
+  }) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final result = await remoteDataSource.registerProduct(
+          title: title,
+          description: description,
+          price: price,
+          stock: stock,
+          weight: weight,
+          image: image,
+        );
+        return Right(result);
+      } on ServerException catch (e) {
+        return Left(ServerFailure(e.message));
       }
     } else {
       return Left(NetworkFailure('No internet connection'));

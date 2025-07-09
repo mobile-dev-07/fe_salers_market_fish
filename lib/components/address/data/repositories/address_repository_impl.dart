@@ -43,4 +43,17 @@ class AddressRepositoryImpl implements AddressRepository {
       return Left(NetworkFailure('No internet connection'));
     }
   }
+  @override
+  Future<Either<Failure, void>> deleteAddress(String id) async { // --- TAMBAHKAN IMPLEMENTASI INI ---
+    if (await networkInfo.isConnected) {
+      try {
+        await remoteDataSource.deleteAddress(id);
+        return const Right(null); // Return Right(null) for void success
+      } on ServerException catch (e) {
+        return Left(ServerFailure(e.message));
+      }
+    } else {
+      return Left(NetworkFailure('No internet connection'));
+    }
+  }
 }

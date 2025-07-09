@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:gudang_market_fish/screens/auth/blocs/auth_bloc.dart';
 import 'package:gudang_market_fish/screens/home/blocs/product_bloc.dart';
+import 'package:gudang_market_fish/screens/home/blocs/ui_cubit.dart';
 import 'package:gudang_market_fish/screens/profile/blocs/address_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -9,6 +10,7 @@ import 'components/address/data/datasources/address_remote_data_source.dart';
 import 'components/address/data/repositories/address_repository_impl.dart';
 import 'components/address/domain/repositories/address_repository.dart';
 import 'components/address/domain/usecases/add_address_usecase.dart';
+import 'components/address/domain/usecases/delete_address_usecase.dart';
 import 'components/address/domain/usecases/get_addresses_usecase.dart';
 import 'components/auth/data/datasources/product_remote_data_source.dart';
 import 'components/auth/data/repositories/product_repository_impl.dart';
@@ -22,6 +24,7 @@ import 'components/auth/data/repositories/auth_repository_impl.dart';
 import 'components/auth/domain/repositories/auth_repository.dart';
 import 'components/auth/domain/usecases/login_usecase.dart';
 import 'core/usecases/get_products.dart';
+import 'core/usecases/register_product.dart';
 import 'core/utils/constants.dart';
 
 final sl = GetIt.instance;
@@ -30,6 +33,7 @@ Future<void> init() async {
   // External
   sl.registerLazySingleton(() => http.Client());
   sl.registerLazySingleton(() => Connectivity());
+  sl.registerFactory(() => UiCubit());
 
   // Core
   sl.registerLazySingleton(() => ApiService(
@@ -64,8 +68,13 @@ Future<void> init() async {
   ));
 
   sl.registerLazySingleton(() => GetProducts(sl()));
+  sl.registerLazySingleton(() => RegisterProduct(sl()));
 
-  sl.registerFactory(() => ProductBloc(getProducts: sl()));
+  sl.registerFactory(() => ProductBloc(
+    getProducts: sl(),
+    registerProduct: sl(), // Inject use case baru
+  ));
+
 
   // Product Feature
   sl.registerLazySingleton<ProductRemoteDataSource>(
@@ -84,10 +93,12 @@ Future<void> init() async {
   // Add the new use case
   sl.registerFactory(() => AddAddress(sl()));
   sl.registerFactory(() => GetAddresses(sl()));
+  sl.registerFactory(() => DeleteAddress(sl()));
 
   sl.registerFactory(() => AddressBloc(
     getAddresses: sl(),
     addAddress: sl(),
+    deleteAddress: sl(),
   ));
 
   sl.registerLazySingleton<AddressRemoteDataSource>(() => AddressRemoteDataSourceImpl(
