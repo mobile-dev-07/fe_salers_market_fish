@@ -1,6 +1,8 @@
 # E-Market Fish - Mobile Fishery Products Marketplace
 A mobile e-commerce application for booking fresh and frozen fishery products. The platform is designed to simplify product management for sellers and product discovery and booking for buyers.
 
+<img src="/assets/Video-Project-8.gif" height="640" />
+
 ## Overview
 
 The project aims to digitalize the fishery marketplace by providing:
@@ -52,15 +54,10 @@ The following interfaces have been implemented in the mobile application but are
 The Flutter application follows **Clean Architecture** to separate presentation, domain, and data responsibilities and make the codebase easier to maintain and extend.
 
 ## Screenshots
-
-Add application screenshots or GIFs here.
-
-Example:
-
-```markdown
-![Home Screen](docs/images/home.png)
-![Product Detail](docs/images/product-detail.png)
-```
+| Image 1 | Image 2 | Image 3 |
+| --- | --- | ---- |
+| ![Image 1](https://drive.google.com/uc?id=1rFV7yX0eV4BZWFrbVyU_H5ej4TXlsil7) | ![Image 1](https://drive.google.com/uc?id=113ZmhgH1rsN-B2BVlK3zeW-SHez5w12S) | ![Image 1](https://drive.google.com/uc?id=1dGuh0Uo-rsj2nZfyAQPsALOht8P-8YjM) |
+| ![Image 1](https://drive.google.com/uc?id=1DCtSTiwdJjmzPISIgd2XQv5t93yabqD5) | ![Image 1](https://drive.google.com/uc?id=1vm9uHszpBtj9AlqqheymwyZT4bjneVag) | ![Image 1](https://drive.google.com/uc?id=1xDwqihsucwyT2D1qhbIyr75gw9s3W8xS) |
 
 ## UI/UX Design
 
