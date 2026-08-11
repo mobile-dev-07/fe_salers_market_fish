@@ -1,5 +1,5 @@
 # E-Market Fish - Mobile Fishery Products Marketplace
-A mobile e-commerce application for booking fresh and frozen fishery products. The platform is designed to simplify product management for sellers and product discovery and booking for buyers.
+A mobile e-commerce application for booking fresh and frozen fishery products. The platform is designed to simplify product management for sellers and product discovery and booking for buyers. For context, this project was developed as the final project for the Mobile Programming course.
 
 <img src="/assets/Video-Project-8.gif" height="640" />
 
